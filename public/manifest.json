@@ -1,0 +1,18 @@
+{
+  "name": "YardLocator — Everest Fleet",
+  "short_name": "YardLocator",
+  "description": "Vehicle yard management for Everest Fleet Chennai",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F6FA",
+  "theme_color": "#0A1F44",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

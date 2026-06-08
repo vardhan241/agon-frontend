@@ -1,6 +1,6 @@
 import { VehicleRecord, HistoryRecord } from "../types";
 
-const BASE_URL = "http://192.168.1.3:8001";
+const BASE_URL = "https://agon-backend-wl3r.onrender.com";
 
 // =====================================================
 // Types

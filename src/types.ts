@@ -1,7 +1,30 @@
-export interface Vehicle {
+export type AppView = 'home' | 'park' | 'find' | 'list' | 'history' | 'admin'
+
+export interface Toast {
+  id: string
+  type: 'success' | 'error' | 'info'
+  message: string
+}
+
+export interface VehicleRecord {
   car_number: string
   bay_number: string
   created_at?: string
+  updated_at?: string
+}
+
+export interface HistoryRecord {
+  car_number: string
+  bay_number: string
+  action: string
+  timestamp: string
+}
+
+export interface StatsData {
+  total_vehicles: number
+  today_entries: number
+  free_bays: number
+  total_bays: number
 }
 
 export interface FindResponse {
@@ -18,14 +41,7 @@ export interface SaveResponse {
 
 export interface HistoryResponse {
   success: boolean
-  history: HistoryItem[]
-}
-
-export interface HistoryItem {
-  car_number: string
-  bay_number: string
-  action: string
-  timestamp: string
+  history: HistoryRecord[]
 }
 
 export interface StatsResponse {

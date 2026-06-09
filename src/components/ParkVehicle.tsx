@@ -13,7 +13,7 @@ import {
   ScanLine,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { apiScanPlate } from "../lib/api";
+import { performOCR } from "../lib/ocr";
 import {
   getOccupiedBays,
   getBayOccupant,
@@ -60,6 +60,8 @@ export default function ParkVehicle({
 
   // ─── Image Handler ───
 
+  // ─── Image Handler ───
+
   const handleImage = useCallback(async (file: File) => {
     // Show preview immediately
     const reader = new FileReader();
@@ -71,29 +73,28 @@ export default function ParkVehicle({
     setOcrStatus("scanning");
 
     try {
-      const result = await apiScanPlate(file);
+      // NOW USING INSTANT LOCAL OCR!
+      const result = await performOCR(file);
 
-      if (result.success && result.plate_number) {
-        setCarNumber(result.plate_number.toUpperCase());
-
+      if (result.plateNumber) {
+        setCarNumber(result.plateNumber.toUpperCase());
         setOcrStatus("detected");
 
         try {
-          const findResp = await apiFindVehicle(result.plate_number);
-
+          const findResp = await apiFindVehicle(result.plateNumber);
           if (findResp.found && findResp.bay_number) {
             setIsDuplicate(true);
-
             setExistingBay(findResp.bay_number);
           }
-        } catch {}
+        } catch (innerErr) {
+          // Ignore offline errors during duplicate check
+        }
       } else {
         setOcrStatus("not_found");
       }
 
       setStep("confirm");
     } catch (err: any) {
-      // Gemini API failed or unavailable
       console.error("OCR Error:", err);
       setOcrStatus("unavailable");
       setStep("confirm");

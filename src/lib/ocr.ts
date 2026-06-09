@@ -1,28 +1,37 @@
-import Tesseract from 'tesseract.js';
-
 export async function performOCR(file: File) {
   try {
-    const url = URL.createObjectURL(file);
-    const result = await Tesseract.recognize(url, 'eng', {
-      logger: () => {},
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(',')[1]);
+      reader.readAsDataURL(file);
     });
 
-    const raw = result.data.text
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '');
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': import.meta.env.VITE_ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 100,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
+            { type: 'text', text: 'Read the vehicle number plate in this image. Reply with ONLY the plate number, nothing else. Example: MH12AB1234' }
+          ]
+        }]
+      })
+    });
 
-    console.log('[OCR RAW]', raw);
-
-    // Try strict Indian format first: MH12AB1234
-    let match = raw.match(/[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{3,4}/);
-    
-    // Fallback: any 6-10 alphanumeric chars
-    if (!match) match = raw.match(/[A-Z0-9]{6,10}/);
-
-    const plate = match ? match[0] : null;
-    console.log('[OCR PLATE]', plate);
+    const data = await response.json();
+    const plate = data.content?.[0]?.text?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '') || null;
+    console.log('[Claude OCR]', plate);
     return { plateNumber: plate };
-  } catch {
+  } catch (e) {
+    console.error(e);
     return { plateNumber: null };
   }
 }

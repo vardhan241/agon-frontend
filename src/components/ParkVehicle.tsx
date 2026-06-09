@@ -136,6 +136,8 @@ export default function ParkVehicle({
 
   // ─── Save Logic ───
 
+  // ─── Save Logic ───
+
   const doSave = async () => {
     setSaving(true);
     try {
@@ -147,15 +149,17 @@ export default function ParkVehicle({
         if (isDuplicate || response.action === "updated") {
           addToast?.("Vehicle moved successfully", "success");
         } else {
-          addToast?.("Vehicle saved successfully", "success");
+          addToast?.("Vehicle saved to Neon successfully!", "success");
         }
 
         setStep("done");
       } else {
         addToast?.("Failed to save vehicle", "error");
       }
-    } catch {
-      addToast?.("Unable to connect to server", "error");
+    } catch (error: any) {
+      // THIS WILL NOW SHOW EXACTLY WHY NEON IS FAILING
+      console.error("Save Error:", error);
+      addToast?.(`Error: ${error.message || "Connection refused"}`, "error");
     } finally {
       setSaving(false);
     }
